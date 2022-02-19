@@ -2,7 +2,6 @@ import React, { Component } from "react";
 import Form from "react-validation/build/form";
 import Input from "react-validation/build/input";
 import CheckButton from "react-validation/build/button";
-import { isEmail } from "validator";
 import AuthService from "../services/auth.service";
 
 const passwordValidator = new RegExp("^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%\^&\*])(?=.{8,})");
@@ -23,16 +22,6 @@ const vpassword = value => {
       </div>
     );
   }
-};
-
-const vemail = value => {
-    if (!isEmail(value)) {
-      return (
-        <div className="alert alert-danger" role="alert">
-          This is not a valid email.
-        </div>
-      );
-    }
 };
 
 export default class ResetPassword extends Component {
@@ -116,17 +105,6 @@ export default class ResetPassword extends Component {
           >
             {!this.state.successful && (
               <div>
-                {/* <div className="form-group">
-                  <label htmlFor="email">Email</label>
-                  <Input
-                    type="email"
-                    className="form-control"
-                    name="email"
-                    value={this.state.email}
-                    onChange={this.onChangeEmail}
-                    validations={[required, vemail]}
-                  />
-                </div> */}
                 <div className="form-group">
                   <label htmlFor="new_password">New Password</label>
                   <Input
