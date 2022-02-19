@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import Form from "react-validation/build/form";
 import Input from "react-validation/build/input";
 import CheckButton from "react-validation/build/button";
+import { isEmail } from "validator";
 import AuthService from "../services/auth.service";
 
 const passwordValidator = new RegExp("^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%\^&\*])(?=.{8,})");
@@ -24,16 +25,29 @@ const vpassword = value => {
   }
 };
 
-export default class ChangePass extends Component {
+const vemail = value => {
+    if (!isEmail(value)) {
+      return (
+        <div className="alert alert-danger" role="alert">
+          This is not a valid email.
+        </div>
+      );
+    }
+};
+
+export default class ResetPassword extends Component {
   constructor(props) {
     super(props);
     this.handleChange = this.handleChange.bind(this);
     this.onChangePassword = this.onChangePassword.bind(this);
+    this.onChangeEmail = this.onChangeEmail.bind(this);
     this.state = {
       new_password: "",
+      email: "",
       successful: false,
       message: "",
-      currentUser: AuthService.getCurrentUser()
+      currentUser: AuthService.getCurrentUser(),
+      loading: false
     };
   }
   onChangePassword(e) {
@@ -42,28 +56,31 @@ export default class ChangePass extends Component {
     });
   }
 
+  onChangeEmail(e) {
+    this.setState({
+      email: e.target.value
+    });
+  }
+
   handleChange(e) {
     e.preventDefault();
     this.setState({
       message: "",
-      successful: false
+      successful: false,
+      loading: true
     });
     this.form.validateAll();
     if (this.checkBtn.context._errors.length === 0) {
-      AuthService.changePass(
-        this.state.currentUser.id,
+      AuthService.resetPass(
+        this.props.match.params.id,
         this.state.new_password
       ).then(
         response => {
           this.setState({
             message: response.data.message,
-            successful: true
+            successful: true,
+            loading: false
           });
-          {
-            AuthService.logout();
-            this.props.history.push("/login");
-            window.location.reload();
-          }
         },
         error => {
           const resMessage =
@@ -74,7 +91,8 @@ export default class ChangePass extends Component {
             error.toString();
           this.setState({
             successful: false,
-            message: resMessage
+            message: resMessage,
+            loading: false
           });
         }
       );
@@ -98,6 +116,17 @@ export default class ChangePass extends Component {
           >
             {!this.state.successful && (
               <div>
+                {/* <div className="form-group">
+                  <label htmlFor="email">Email</label>
+                  <Input
+                    type="email"
+                    className="form-control"
+                    name="email"
+                    value={this.state.email}
+                    onChange={this.onChangeEmail}
+                    validations={[required, vemail]}
+                  />
+                </div> */}
                 <div className="form-group">
                   <label htmlFor="new_password">New Password</label>
                   <Input
@@ -110,7 +139,15 @@ export default class ChangePass extends Component {
                   />
                 </div>
                 <div className="form-group">
-                  <button className="btn btn-primary btn-block">Update</button>
+                    <button
+                        className="btn btn-primary btn-block"
+                        disabled={this.state.loading}
+                    >
+                        {this.state.loading && (
+                        <span className="spinner-border spinner-border-sm"></span>
+                        )}
+                        <span>Send</span>
+                    </button>
                 </div>
               </div>
             )}

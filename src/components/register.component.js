@@ -56,7 +56,8 @@ export default class Register extends Component {
       email: "",
       password: "",
       successful: false,
-      message: ""
+      message: "",
+      loading: false
     };
   }
   onChangeUsername(e) {
@@ -78,7 +79,8 @@ export default class Register extends Component {
     e.preventDefault();
     this.setState({
       message: "",
-      successful: false
+      successful: false,
+      loading: true
     });
     this.form.validateAll();
     if (this.checkBtn.context._errors.length === 0) {
@@ -90,7 +92,8 @@ export default class Register extends Component {
         response => {
           this.setState({
             message: response.data.message,
-            successful: true
+            successful: true,
+            loading: false
           });
         },
         error => {
@@ -102,7 +105,8 @@ export default class Register extends Component {
             error.toString();
           this.setState({
             successful: false,
-            message: resMessage
+            message: resMessage,
+            loading: false
           });
         }
       );
@@ -157,10 +161,17 @@ export default class Register extends Component {
                     onChange={this.onChangePassword}
                     validations={[required, vpassword]}
                   />
-                  {/* <label><a href="">Forgot your password?</a></label> */}
                 </div>
                 <div className="form-group">
-                  <button className="btn btn-primary btn-block">Sign Up</button>
+                  <button
+                    className="btn btn-primary btn-block"
+                    disabled={this.state.loading}
+                  >
+                    {this.state.loading && (
+                      <span className="spinner-border spinner-border-sm"></span>
+                    )}
+                    <span>Sign Up</span>
+                  </button>
                 </div>
               </div>
             )}

@@ -18,6 +18,7 @@ export default class Profile extends Component {
             <button className="btn btn-info float-right"><Link className="change_password" to={"/changePass"}>
               Change Password </Link>
             </button>
+            {/* {currentUser.token} */}
           </h3>
         </header>
         {/* <p>

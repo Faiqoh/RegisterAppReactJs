@@ -3,8 +3,8 @@ import Form from "react-validation/build/form";
 import Input from "react-validation/build/input";
 import CheckButton from "react-validation/build/button";
 import AuthService from "../services/auth.service";
+import { isEmail } from "validator";
 
-const passwordValidator = new RegExp("^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%\^&\*])(?=.{8,})");
 const required = value => {
   if (!value) {
     return (
@@ -14,31 +14,34 @@ const required = value => {
     );
   }
 };
-const vpassword = value => {
-  if (!passwordValidator.test(value)){
-    return (
-      <div className="alert alert-danger" role="alert">
-        Password must contain at least 8 characters, 1 number, 1 upper, 1 lowercase and 1 symbol!
-      </div>
-    );
-  }
+
+const vemail = value => {
+    if (!isEmail(value)) {
+      return (
+        <div className="alert alert-danger" role="alert">
+          This is not a valid email.
+        </div>
+      );
+    }
 };
 
-export default class ChangePass extends Component {
+
+export default class ForgotPassword extends Component {
   constructor(props) {
     super(props);
     this.handleChange = this.handleChange.bind(this);
-    this.onChangePassword = this.onChangePassword.bind(this);
+    this.onChangeEmail = this.onChangeEmail.bind(this);
     this.state = {
-      new_password: "",
+      email: "",
       successful: false,
       message: "",
-      currentUser: AuthService.getCurrentUser()
+      currentUser: AuthService.getCurrentUser(),
+      loading: false,
     };
   }
-  onChangePassword(e) {
+  onChangeEmail(e) {
     this.setState({
-      new_password: e.target.value
+      email: e.target.value
     });
   }
 
@@ -46,24 +49,20 @@ export default class ChangePass extends Component {
     e.preventDefault();
     this.setState({
       message: "",
-      successful: false
+      successful: false,
+      loading: true
     });
     this.form.validateAll();
     if (this.checkBtn.context._errors.length === 0) {
-      AuthService.changePass(
-        this.state.currentUser.id,
-        this.state.new_password
+      AuthService.forgotPass(
+        this.state.email
       ).then(
         response => {
           this.setState({
             message: response.data.message,
-            successful: true
+            successful: true,
+            loading: false
           });
-          {
-            AuthService.logout();
-            this.props.history.push("/login");
-            window.location.reload();
-          }
         },
         error => {
           const resMessage =
@@ -74,7 +73,8 @@ export default class ChangePass extends Component {
             error.toString();
           this.setState({
             successful: false,
-            message: resMessage
+            message: resMessage,
+            loading: false
           });
         }
       );
@@ -99,18 +99,29 @@ export default class ChangePass extends Component {
             {!this.state.successful && (
               <div>
                 <div className="form-group">
-                  <label htmlFor="new_password">New Password</label>
+                  <h5 style={{textAlign: 'center'}}>Please Insert your Email</h5>
+                </div>
+                <div className="form-group">
+                  <label htmlFor="email">Email</label>
                   <Input
-                    type="password"
+                    type="email"
                     className="form-control"
-                    name="new_password"
-                    value={this.state.new_password}
-                    onChange={this.onChangePassword}
-                    validations={[required, vpassword]}
+                    name="email"
+                    value={this.state.email}
+                    onChange={this.onChangeEmail}
+                    validations={[required, vemail]}
                   />
                 </div>
                 <div className="form-group">
-                  <button className="btn btn-primary btn-block">Update</button>
+                    <button
+                        className="btn btn-primary btn-block"
+                        disabled={this.state.loading}
+                    >
+                        {this.state.loading && (
+                        <span className="spinner-border spinner-border-sm"></span>
+                        )}
+                        <span>Send</span>
+                    </button>
                 </div>
               </div>
             )}

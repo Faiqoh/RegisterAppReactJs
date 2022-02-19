@@ -129,7 +129,7 @@ export default class Login extends Component {
                 onChange={this.onChangePassword}
                 validations={[required]}
               />
-              <p><a href="">Forgot your password?</a></p>
+              <p><Link to={"/forgotPass"}>Forgot your password?</Link></p>
             </div>
 
             <div className="form-group">
